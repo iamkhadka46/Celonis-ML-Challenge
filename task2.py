@@ -26,6 +26,10 @@ html_content = """
 </head>
 <body>
     <h1>Hand Gesture Recognition</h1>
+    <form action="/api/train" method="post" enctype="multipart/form-data">
+        <label>Click to Train</label><br>
+        <input type="submit" value="Train">
+    </form>
     <form action="/api/predict" method="post" enctype="multipart/form-data">
         <label for="file">Upload a file:</label><br>
         <input type="file" name="file" id="file"><br>
