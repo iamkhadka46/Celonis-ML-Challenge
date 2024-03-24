@@ -14,7 +14,7 @@ from pathlib import Path
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve(strict=True).parent
 
-MODEL_DIR = os.path.joint(BASE_DIR, 'models')
+MODEL_DIR = os.path.join(BASE_DIR, 'models')
 
 def load_data(dataset_path):
     coords = []
