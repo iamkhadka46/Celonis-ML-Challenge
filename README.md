@@ -1,27 +1,27 @@
 # Celonis-ML-Challenge
 
-### The two parts of the task are in files task1.py and task2.py.
+#### The two parts of the task are in files task1.py and task2.py.
 
-### The file model_analysis.ipynb contains scripts used to analyze the evaluate the classifier model performance.
+#### The file model_analysis.ipynb contains scripts used to analyze the evaluate the classifier model performance.
 
-#Prerequisites:
-pip install -r requirements.txt
+Prerequisites:
+`pip install -r requirements.txt`
 
-### task1.py
+#### - task1.py
 
 Command to run the file:
 `python task1.py`
 
-### task2.py
+#### - task2.py
 
 Command to run the file:
 `uvicorn task2:app --reload`
 
-### I have further deployed the app using two methods which can be accessed by the link below:
+#### I have further deployed the app on heroku using two methods which can be accessed by the link below:
 
 #### 1. Deployment to heroku using docker image.
 
-- [Heroku](https://handclass-290412c88aac.herokuapp.com/).
+- [Heroku](https://handclass-290412c88aac.herokuapp.com/)
 - [SwaggerUI](https://handclass-290412c88aac.herokuapp.com/docs)
 
 #### 2. Deployment using github actions on heroku using docker image.
