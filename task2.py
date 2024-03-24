@@ -9,10 +9,12 @@ from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, precision_recall_fscore_support
 import joblib
+from pathlib import Path
 
 app = FastAPI()
+BASE_DIR = Path(__file__).resolve(strict=True).parent
 
-MODEL_DIR = 'models'
+MODEL_DIR = os.path.joint(BASE_DIR, 'models')
 
 def load_data(dataset_path):
     coords = []
@@ -56,7 +58,7 @@ def train_clf(X_train, X_test, y_train, y_test):
 
 
 @app.post("/api/train")
-async def train(dataset_path: str | None = 'uWaveGestureLibrary', ):
+async def train(dataset_path: str | None = os.path.join(BASE_DIR, 'uWaveGestureLibrary')):
     os.makedirs('models', exist_ok=True)
     coords, Y = load_data(dataset_path)
     X_train, X_test, y_train, y_test, max_length = prepare_data(coords, Y) 
