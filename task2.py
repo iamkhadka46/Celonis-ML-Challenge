@@ -1,7 +1,7 @@
 #Importing necessary libraries
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 #from pydantic import BaseModel
 import os
 import numpy as np
@@ -48,7 +48,7 @@ async def inference(file: UploadFile, max_length: int | None = 945):
     #Validation to check if training endpoint has been called before. It is called only if model directory is created.
     try:
         if not os.path.exists(MODEL_DIR):
-            raise HTTPException(status_code = 400, detail = "Models not trained yet.")
+            raise HTTPException(status_code = 400, detail = "Models not trained yet!")
         input= []
         preds = []
         #Same preprocessing as for the training set without the iteration.
@@ -66,6 +66,6 @@ async def inference(file: UploadFile, max_length: int | None = 945):
 
         return {'Hand Gesture' : str(preds)}
     except Exception as e:
-        raise HTTPException(status_code = 404, detail = "File not found.")
+        return JSONResponse(status_code=400, content={"message": str(e)})
 
 
