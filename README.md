@@ -7,12 +7,12 @@
 Prerequisites:
 `pip install -r requirements.txt`
 
-#### - task1.py
+#### 1. task1.py
 
 Command to run the file:
 `python task1.py`
 
-#### - task2.py
+#### 2. task2.py
 
 Command to run the file:
 `uvicorn task2:app --reload`
