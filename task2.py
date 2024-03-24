@@ -1,6 +1,6 @@
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from pydantic import BaseModel
+#from pydantic import BaseModel
 
 import os
 import numpy as np
