@@ -1,8 +1,8 @@
+#Importing necessary libraries
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse
 #from pydantic import BaseModel
-
 import os
 import numpy as np
 import pandas as pd
@@ -11,111 +11,61 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, precision_recall_fscore_support
 import joblib
 from pathlib import Path
+from task1 import *
 
 app = FastAPI()
-BASE_DIR = Path(__file__).resolve(strict=True).parent
 
-MODEL_DIR = os.path.join(BASE_DIR, 'models')
+#Implementing basic html components for deployment. 
+HOME_PAGE =  f"{BASE_DIR}/index.html"
 
-# HTML template
-html_content = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Hand Gesture Recognition</title>
-</head>
-<body>
-    <h1>Hand Gesture Recognition</h1>
-    <form action="/api/train" method="post" enctype="multipart/form-data">
-        <label>Click to Train</label><br>
-        <input type="submit" value="Train">
-    </form>
-    <form action="/api/predict" method="post" enctype="multipart/form-data">
-        <label for="file">Upload a file:</label><br>
-        <input type="file" name="file" id="file"><br>
-        <input type="submit" value="Predict">
-    </form>
-</body>
-</html>
-"""
+# Read HTML content from file
+with open(HOME_PAGE, "r") as file:
+    home_page = file.read()
 
 
-
-def load_data(dataset_path):
-    coords = []
-    Y = []
-    for folder in os.listdir(dataset_path):
-        folder_path = os.path.join(dataset_path, folder)
-        for file in os.listdir(folder_path):
-            if file[0].isalpha() and file.endswith('.txt'):
-                gesture_index = int(file.split("-")[0][-1])
-                df = pd.read_csv(os.path.join(folder_path,file), header=None, delimiter="\s+")
-                reshaped_df = df.values.flatten()
-                coords.append(reshaped_df)
-                Y.append(gesture_index)
-    return coords, Y
-
-
-def prepare_data(coords, Y):
-    global max_length
-    max_length = max(len(seq) for seq in coords)
-    for i in range(len(coords)):
-        array_length = len(coords[i])
-        padding = np.zeros(max_length - array_length)
-        coords[i] = np.concatenate((coords[i], padding))
-    X = np.array(coords)
-    y = np.array(Y)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return X_train, X_test, y_train, y_test, max_length
-
-
-@app.get("/", response_class=HTMLResponse)  # Return HTMLResponse for the root path
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    return html_content
+    return home_page
 
 
-def train_clf(X_train, X_test, y_train, y_test):
-    model = SVC(kernel='rbf', gamma='scale')
-    model.fit(X_train, y_train)
-
-    model_dir = os.path.join(MODEL_DIR, 'clf_model.pkl')
-    joblib.dump(model, model_dir)
-
-    y_pred = model.predict(X_test)
-    #evaluation_metrics = model.score(X_train, y_train)
-    evaluation_metrics = classification_report(y_test, y_pred, output_dict=True)
-    return model_dir, evaluation_metrics
-
-
+#Training endpoint for our classifier model. 
 @app.post("/api/train")
 async def train(dataset_path: str | None = os.path.join(BASE_DIR, 'uWaveGestureLibrary')):
+    #Create directory to save model when called train endpoint. 
     os.makedirs('models', exist_ok=True)
     coords, Y = load_data(dataset_path)
     X_train, X_test, y_train, y_test, max_length = prepare_data(coords, Y) 
-    model_dir, evaluation_metrics = train_clf(X_train, X_test, y_train, y_test)
+    model, evaluation_metrics = train_clf(X_train, X_test, y_train, y_test)
     metrics = {'Accuracy' : evaluation_metrics['accuracy'], 
-            'Macro Avg' : evaluation_metrics['macro avg'], 'Weighted Avg' : evaluation_metrics['weighted avg']}
+            'Macro Avg' : evaluation_metrics['macro avg'], 
+            'Weighted Avg' : evaluation_metrics['weighted avg']}
 
-    return {'model_dir' : model_dir, 'metrics' : metrics}
+    return {'metrics' : metrics}
 
 
 @app.post("/api/predict")
 async def inference(file: UploadFile, max_length: int | None = 945):
-    if not os.path.exists(MODEL_DIR):
-        raise HTTPException(status_code = 400, detail = "Models not trained yet.")
-    input= []
-    preds = []
-    df = pd.read_csv(file.file, header=None, delimiter="\s+")
-    reshaped_df = df.values.flatten()
-    input = np.array(reshaped_df)
-    padding = np.zeros(max_length - len(input))
-    input = np.concatenate((input, padding))
+    #Validation to check if training endpoint has been called before. It is called only if model directory is created.
+    try:
+        if not os.path.exists(MODEL_DIR):
+            raise HTTPException(status_code = 400, detail = "Models not trained yet.")
+        input= []
+        preds = []
+        #Same preprocessing as for the training set without the iteration.
+        df = pd.read_csv(file.file, header=None, delimiter=" ")
+        reshaped_df = df.values.flatten()
+        input = np.array(reshaped_df)
+        padding = np.zeros(max_length - len(input))
+        input = np.concatenate((input, padding))
 
-    for model in os.listdir(MODEL_DIR):
-        clf_model = joblib.load(os.path.join(MODEL_DIR, model))
-        pred = clf_model.predict(input.reshape(1, -1))
-        preds.append(pred[0])
+        # for loop incase we have several models in the directory. 
+        for model in os.listdir(MODEL_DIR):
+            clf_model = joblib.load(os.path.join(MODEL_DIR, model))
+            pred = clf_model.predict(input.reshape(1, -1))
+            preds.append(pred[0])
 
-    return {'Hand Gesture' : str(preds)}
+        return {'Hand Gesture' : str(preds)}
+    except Exception as e:
+        raise HTTPException(status_code = 404, detail = "File not found.")
 
 
