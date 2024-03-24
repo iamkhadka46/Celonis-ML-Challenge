@@ -2,14 +2,12 @@
 
 The two parts of the task are in files task1.py and task2.py.
 
-###Task 1
+#Prerequisites:
+pip install -r requirements.txt
 
-1. Item 1
-2. Item 2
-3. Item 3
-   - Sub item 1
-   - Sub item 3
+##task1.py
 
-- Unordered item
-- Unordered item
-- Unordered item
+Command to run the file:
+`python task1.py`
+
+##

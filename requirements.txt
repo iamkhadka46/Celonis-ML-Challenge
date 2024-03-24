@@ -11,3 +11,4 @@ fastapi
 scikit-learn
 pandas
 pathlib
+matplotlib
