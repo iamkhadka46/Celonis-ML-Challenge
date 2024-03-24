@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, HTMLResponse
 #from pydantic import BaseModel
 
 import os
@@ -15,6 +15,26 @@ app = FastAPI()
 BASE_DIR = Path(__file__).resolve(strict=True).parent
 
 MODEL_DIR = os.path.join(BASE_DIR, 'models')
+
+# HTML template
+html_content = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hand Gesture Recognition</title>
+</head>
+<body>
+    <h1>Hand Gesture Recognition</h1>
+    <form action="/api/predict" method="post" enctype="multipart/form-data">
+        <label for="file">Upload a file:</label><br>
+        <input type="file" name="file" id="file"><br>
+        <input type="submit" value="Predict">
+    </form>
+</body>
+</html>
+"""
+
+
 
 def load_data(dataset_path):
     coords = []
@@ -42,6 +62,11 @@ def prepare_data(coords, Y):
     y = np.array(Y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     return X_train, X_test, y_train, y_test, max_length
+
+
+@app.get("/", response_class=HTMLResponse)  # Return HTMLResponse for the root path
+async def root():
+    return html_content
 
 
 def train_clf(X_train, X_test, y_train, y_test):
