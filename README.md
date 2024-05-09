@@ -1,4 +1,4 @@
-# Celonis-ML-Challenge
+# Gesture Detection from time-series data (ML, FLASK API, Multi-Class Classification, Git CI/CD pipeline, Docker, Heroku Deployment, HTML)
 
 Gesture detection from time-series data and building production ready app
 The task is to classify a given time-series into one of 8 classes, i.e., 8 different gestures. There are two aspects of this challenge: model building (from scratch and using libraries) and gathering some assumption/ideas towards making the model as a ML software to be deployed in production environment.
